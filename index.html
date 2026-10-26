@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataConvert — Konverter Satuan Data</title>
+<style>
+  :root { --bg:#0b1020; --panel:#121a30; --panel2:#18233e; --text:#f4f7ff; --muted:#a8b4d0; --accent:#7c9cff; --accent2:#64e5c2; --line:rgba(255,255,255,.1); }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; font-family:Inter,Segoe UI,Arial,sans-serif; color:var(--text); background:radial-gradient(circle at 15% 10%,#1a2c57 0,transparent 34%),radial-gradient(circle at 90% 80%,#123c46 0,transparent 28%),var(--bg); }
+  .wrap { width:min(1050px,92%); margin:auto; padding:34px 0 24px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:34px; }
+  .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:.3px; font-size:1.15rem; }
+  .logo { display:grid; place-items:center; width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#8e6bff); box-shadow:0 8px 28px #617fff44; }
+  .logo svg { width:24px;height:24px; }
+  .tag { color:var(--accent2); border:1px solid #64e5c244; background:#64e5c20d; padding:8px 12px; border-radius:99px; font-size:.78rem; }
+  .hero { text-align:center; max-width:720px; margin:0 auto 30px; }
+  .eyebrow { color:var(--accent2); font-size:.78rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; }
+  h1 { font-size:clamp(2rem,5vw,3.6rem); line-height:1.08; margin:12px 0; letter-spacing:-1.7px; }
+  h1 span { background:linear-gradient(90deg,#9cb4ff,#64e5c2); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p { color:var(--muted); line-height:1.7; margin:0; }
+  .layout { display:grid; grid-template-columns:1.2fr .8fr; gap:18px; align-items:start; }
+  .card { background:linear-gradient(150deg,#17223bdf,#10182bdc); border:1px solid var(--line); border-radius:22px; padding:24px; box-shadow:0 18px 50px #0002; backdrop-filter:blur(12px); }
+  .card h2 { font-size:1.08rem; margin:0 0 6px; }
+  .sub { color:var(--muted); font-size:.88rem; line-height:1.55; margin:0 0 22px; }
+  label { display:block; color:#d7def2; font-size:.86rem; margin-bottom:9px; font-weight:650; }
+  input,select { width:100%; color:var(--text); background:#0c1427; border:1px solid #2a3858; border-radius:12px; padding:13px 14px; font:inherit; outline:none; transition:.2s; }
+  input:focus,select:focus { border-color:var(--accent); box-shadow:0 0 0 3px #7c9cff20; }
+  select option { background:#0c1427; }
+  .field { margin-bottom:17px; }
+  .two { display:grid; grid-template-columns:1fr 48px 1fr; gap:10px; align-items:end; }
+  .swap { width:44px;height:44px;border:1px solid #344365;border-radius:13px;background:#202d4a;color:#b8c8ff;font-size:1.25rem;cursor:pointer;margin-bottom:0; }
+  .swap:hover { background:#2b3b61; transform:rotate(180deg); transition:.25s; }
+  .result { margin-top:20px; border:1px solid #7c9cff50; background:linear-gradient(135deg,#7c9cff18,#64e5c20c); border-radius:18px; padding:20px; }
+  .result-top { display:flex; justify-content:space-between; align-items:center; gap:12px; color:var(--muted); font-size:.82rem; }
+  .result-value { font-size:clamp(1.55rem,4vw,2.35rem); font-weight:800; letter-spacing:-.8px; overflow-wrap:anywhere; margin:12px 0 7px; }
+  .result-unit { color:var(--accent2); font-size:.92rem; }
+  .actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:15px; }
+  button { cursor:pointer; font:inherit; }
+  .btn { border:0; border-radius:11px; padding:10px 14px; font-weight:750; font-size:.86rem; }
+  .primary { color:#091225; background:linear-gradient(100deg,#9cb4ff,#64e5c2); }
+  .secondary { color:#dfe7ff; background:#24314f; border:1px solid #354568; }
+  .btn:hover { filter:brightness(1.08); }
+  .note { color:var(--muted); font-size:.79rem; line-height:1.55; margin:14px 0 0; }
+  .mode { display:flex; gap:8px; margin:15px 0 20px; background:#0b1326; border:1px solid var(--line); padding:5px; border-radius:13px; }
+  .mode button { flex:1; padding:10px 8px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-size:.82rem; font-weight:750; }
+  .mode button.active { color:#10182b; background:linear-gradient(100deg,#9cb4ff,#64e5c2); }
+  .table-wrap { overflow:auto; margin-top:14px; }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  th,td { padding:11px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  th { color:var(--muted); font-size:.75rem; text-transform:uppercase; letter-spacing:.6px; }
+  td:last-child,th:last-child { text-align:right; }
+  .unit-name { font-weight:750; }
+  .unit-desc { display:block; color:var(--muted); font-size:.75rem; margin-top:3px; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:17px; }
+  .mini { padding:14px; border-radius:14px; background:#0d162b; border:1px solid var(--line); }
+  .mini strong { display:block; font-size:1.2rem; margin-bottom:4px; }
+  .mini span { color:var(--muted); font-size:.78rem; }
+  footer { text-align:center; padding:28px 0 4px; color:#8997b7; font-size:.82rem; }
+  footer strong { color:#dfe7ff; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#e8fff8; color:#102b2a; padding:11px 16px; border-radius:12px; font-weight:750; box-shadow:0 8px 30px #0004; transition:.25s; }
+  .toast.show { opacity:1; transform:translate(-50%,0); }
+  @media(max-width:760px) { .layout { grid-template-columns:1fr; } header { margin-bottom:28px; } .card { padding:19px; } .tag { display:none; } }
+  @media(max-width:430px) { .two { grid-template-columns:1fr; } .swap { width:100%; height:38px; transform:none!important; } .wrap { width:94%; padding-top:22px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/><path d="m17 10 3 2-3 2"/></svg>
+      </div>
+      <span>DataConvert</span>
+    </div>
+    <div class="tag">KONVERTER SATUAN DATA</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Simple · Fast · Accurate</div>
+    <h1>Konversi data jadi <span>lebih mudah.</span></h1>
+    <p>Ubah satuan penyimpanan data dalam hitungan detik. Pilih satuan, masukkan nilai, lalu dapatkan hasilnya secara otomatis.</p>
+  </section>
+
+  <main class="layout">
+    <section class="card">
+      <h2>Konverter satuan</h2>
+      <p class="sub">Hasil akan berubah otomatis saat nilai atau satuan diganti.</p>
+      <div class="mode" role="group" aria-label="Sistem satuan">
+        <button class="active" id="decimalBtn" type="button">Desimal (SI)</button>
+        <button id="binaryBtn" type="button">Biner (IEC)</button>
+      </div>
+      <div class="field">
+        <label for="amount">Nilai yang dikonversi</label>
+        <input id="amount" type="number" min="0" step="any" value="1" placeholder="Masukkan angka" inputmode="decimal">
+      </div>
+      <div class="two">
+        <div class="field">
+          <label for="fromUnit">Dari satuan</label>
+          <select id="fromUnit"></select>
+        </div>
+        <button class="swap" id="swapBtn" type="button" aria-label="Tukar satuan" title="Tukar satuan">⇄</button>
+        <div class="field">
+          <label for="toUnit">Ke satuan</label>
+          <select id="toUnit"></select>
+        </div>
+      </div>
+      <div class="result" aria-live="polite">
+        <div class="result-top"><span>HASIL KONVERSI</span><span id="formula">1 KB = 1.000 B</span></div>
+        <div class="result-value" id="resultValue">1.000</div>
+        <div class="result-unit" id="resultUnit">Byte (B)</div>
+        <div class="actions">
+          <button class="btn primary" id="copyBtn" type="button">Salin hasil</button>
+          <button class="btn secondary" id="resetBtn" type="button">Atur ulang</button>
+        </div>
+      </div>
+      <p class="note">Catatan: SI menggunakan kelipatan 1.000, sedangkan IEC menggunakan kelipatan 1.024. Satuan bit (b) dan byte (B) berbeda; 1 byte = 8 bit.</p>
+    </section>
+
+    <aside class="card">
+      <h2>Referensi satuan</h2>
+      <p class="sub">Lihat gambaran nilai setiap satuan berdasarkan sistem yang dipilih.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Satuan</th><th>Setara byte</th></tr></thead>
+          <tbody id="referenceRows"></tbody>
+        </table>
+      </div>
+      <div class="info-grid">
+        <div class="mini"><strong id="baseNumber">1.000</strong><span>Kelipatan desimal</span></div>
+        <div class="mini"><strong id="binaryNumber">1.024</strong><span>Kelipatan biner</span></div>
+      </div>
+      <p class="note">Contoh penggunaan: menghitung ukuran file, kapasitas penyimpanan, dan memahami perbedaan KB/MB dengan KiB/MiB.</p>
+    </aside>
+  </main>
+
+  <footer>
+    Dibuat oleh <strong>@ysufthrizq IX IBS 1</strong><br>
+    <span style="display:inline-block;margin-top:7px">DataConvert · Aplikasi konversi satuan data</span>
+  </footer>
+</div>
+<div class="toast" id="toast">Hasil berhasil disalin!</div>
+<script>
+(() => {
+  const decimalUnits = [
+    {name:'Bit', symbol:'b', factor:1/8},
+    {name:'Byte', symbol:'B', factor:1},
+    {name:'Kilobyte', symbol:'KB', factor:1e3},
+    {name:'Megabyte', symbol:'MB', factor:1e6},
+    {name:'Gigabyte', symbol:'GB', factor:1e9},
+    {name:'Terabyte', symbol:'TB', factor:1e12},
+    {name:'Petabyte', symbol:'PB', factor:1e15},
+    {name:'Exabyte', symbol:'EB', factor:1e18}
+  ];
+  const binaryUnits = [
+    {name:'Bit', symbol:'b', factor:1/8},
+    {name:'Byte', symbol:'B', factor:1},
+    {name:'Kibibyte', symbol:'KiB', factor:1024},
+    {name:'Mebibyte', symbol:'MiB', factor:1024**2},
+    {name:'Gibibyte', symbol:'GiB', factor:1024**3},
+    {name:'Tebibyte', symbol:'TiB', factor:1024**4},
+    {name:'Pebibyte', symbol:'PiB', factor:1024**5},
+    {name:'Exbibyte', symbol:'EiB', factor:1024**6}
+  ];
+  let mode = 'decimal';
+  const $ = id => document.getElementById(id);
+  const amount = $('amount'), from = $('fromUnit'), to = $('toUnit');
+  const fmt = (n, max=8) => {
+    if (!Number.isFinite(n)) return 'Tidak valid';
+    if (n === 0) return '0';
+    if (Math.abs(n) >= 1e15 || Math.abs(n) < 1e-7) return n.toExponential(5).replace('.', ',');
+    return new Intl.NumberFormat('id-ID', {maximumFractionDigits:max}).format(n);
+  };
+  const units = () => mode === 'decimal' ? decimalUnits : binaryUnits;
+  function populate(keep=true) {
+    const oldFrom = from.value || 'KB', oldTo = to.value || 'B';
+    from.innerHTML = ''; to.innerHTML = '';
+    units().forEach(u => {
+      from.add(new Option(`${u.name} (${u.symbol})`, u.symbol));
+      to.add(new Option(`${u.name} (${u.symbol})`, u.symbol));
+    });
+    from.value = units().some(u=>u.symbol===oldFrom) && keep ? oldFrom : (mode==='decimal'?'KB':'KiB');
+    to.value = units().some(u=>u.symbol===oldTo) && keep ? oldTo : 'B';
+    update();
+  }
+  function update() {
+    const list = units(), a = list.find(u=>u.symbol===from.value), b = list.find(u=>u.symbol===to.value);
+    const value = Number(amount.value);
+    if (amount.value.trim()==='' || !Number.isFinite(value) || value < 0) {
+      $('resultValue').textContent = 'Masukkan nilai valid';
+      $('resultUnit').textContent = '';
+      $('formula').textContent = 'Nilai harus 0 atau lebih';
+      return;
+    }
+    const result = value * a.factor / b.factor;
+    $('resultValue').textContent = fmt(result);
+    $('resultUnit').textContent = `${b.name} (${b.symbol})`;
+    $('formula').textContent = `${fmt(value)} ${a.symbol} = ${fmt(result)} ${b.symbol}`;
+    $('referenceRows').innerHTML = list.slice(1).map(u => `<tr><td><span class="unit-name">${u.symbol}</span><span class="unit-desc">${u.name}</span></td><td>${fmt(u.factor, 0)} B</td></tr>`).join('');
+    $('baseNumber').textContent = '1.000';
+    $('binaryNumber').textContent = '1.024';
+  }
+  $('decimalBtn').addEventListener('click', () => {
+    mode='decimal'; $('decimalBtn').classList.add('active'); $('binaryBtn').classList.remove('active'); populate(false);
+  });
+  $('binaryBtn').addEventListener('click', () => {
+    mode='binary'; $('binaryBtn').classList.add('active'); $('decimalBtn').classList.remove('active'); populate(false);
+  });
+  amount.addEventListener('input', update); from.addEventListener('change', update); to.addEventListener('change', update);
+  $('swapBtn').addEventListener('click', () => { const x=from.value; from.value=to.value; to.value=x; update(); });
+  $('resetBtn').addEventListener('click', () => { amount.value='1'; mode='decimal'; $('decimalBtn').classList.add('active'); $('binaryBtn').classList.remove('active'); populate(false); });
+  $('copyBtn').addEventListener('click', async () => {
+    const text = `${$('formula').textContent} (${ $('resultUnit').textContent })`;
+    try {
+      await navigator.clipboard.writeText(text);
+      $('toast').classList.add('show'); setTimeout(()=>$('toast').classList.remove('show'),1800);
+    } catch(e) {
+      const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      $('toast').textContent='Hasil disalin!'; $('toast').classList.add('show'); setTimeout(()=>$('toast').classList.remove('show'),1800);
+    }
+  });
+  populate(false);
+})();
+</script>
+</body>
+</html>
